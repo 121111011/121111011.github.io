@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PLAYER &gt; BOSS – SLIDE3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin:0; padding:0; height: 100vh; overflow: hidden; font-family: 'Press Start 2P', monospace; }
+        
+        /* DIMMED BACKGROUND */
+        .bg { position: fixed; inset:0; z-index: -1; }
+        .bg img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+        .dim-overlay { position: fixed; inset:0; background: rgba(8, 22, 45, 0.65); z-index:0; }
+        
+        /* SCREEN SHAKE */
+        .shake { animation: screenShake 0.5s ease; }
+        @keyframes screenShake {
+            0% { transform: translate(0); }
+            20% { transform: translate(-12px, 8px); }
+            40% { transform: translate(12px, -8px); }
+            60% { transform: translate(-8px, 6px); }
+            80% { transform: translate(8px, -6px); }
+            100% { transform: translate(0); }
+        }
+
+        /* INTRO VIDEO */
+        #introVideoContainer {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #introVideoContainer video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .skip-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 16px;
+            font-size: 0.5rem;
+            background: #222;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            cursor: pointer;
+            z-index: 10001;
+        }
+
+        /* CHARACTERS */
+        .character { position: absolute; bottom: 20px; left: 20px; width: 320px; transition: left 1.2s ease-in-out; z-index: 2; }
+        .boss { position: absolute; top: 20px; right: -400px; width: 420px; transition: right 0.9s ease-out; z-index: 3; }
+        .boss.show { right: 20px; }
+        
+        /* TEXTBOXES */
+        .textbox-container { position: absolute; bottom: 80px; left: 360px; right: 40px; }
+        .name-tag { background: #0b1c3a; border: 4px solid #00ffaa; border-bottom: none; padding: 10px 16px; font-size: 0.65rem; color: #00ffaa; width: fit-content; }
+        .textbox { background: #0b1c3a; border: 4px solid #00ffaa; padding: 22px; color: #ffffff; font-size: 0.6rem; line-height: 2; z-index: 2; font-family: 'Press Start 2P', monospace; text-shadow: 2px 2px 0px #000; }
+        
+        .boss-speech {
+            position: absolute;
+            top: 20px;
+            right: 460px;
+            width: 420px;
+            background: #550000;
+            border: 6px solid #ff2222;
+            padding: 20px;
+            font-size: 0.6rem;
+            color: #ffffff;
+            line-height: 1.9;
+            display: none;
+            animation: bossPulse 1s infinite;
+            z-index: 3;
+            font-family: 'Press Start 2P', monospace;
+            text-shadow: 2px 2px 0px #000;
+        }
+        @keyframes bossPulse { 
+            0%, 100% { box-shadow: 8px 8px 0 #220000; } 
+            50% { box-shadow: 14px 14px 0 #330000; } 
+        }
+        
+        /* CHOICE BUTTONS */
+        .choices { display: none; flex-direction: column; gap: 12px; margin-top: 16px; }
+        .choice-btn { padding: 14px; background: #004433; border: 4px solid #00ffaa; color: #00ffaa; font-size: 0.6rem; cursor: pointer; text-align: center; font-family: 'Press Start 2P', monospace; }
+        .choice-btn:hover { background: #006644; }
+    </style>
+</head>
+<body>
+    <!-- INTRO VIDEO -->
+    <div id="introVideoContainer">
+        <!-- Changed source to transition2.mp4 and removed 'muted' -->
+        <video id="introVideo" autoplay playsinline>
+            <source src="transition2.mp4" type="video/mp4">
+        </video>
+        <button class="skip-btn" id="skipBtn" onclick="skipIntro()">SKIP VIDEO</button>
+    </div>
+
+    <div class="bg"><img src="background.jpg" alt="Background"></div>
+    <div class="dim-overlay"></div>
+
+    <img class="character" id="bob" src="Bob.png" alt="Bob">
+    <img class="boss" id="boss" src="Boss.png" alt="Boss">
+
+    <div class="boss-speech" id="bossSpeech"></div>
+
+    <div class="textbox-container">
+        <div class="name-tag">BOB</div>
+        <div class="textbox" id="bobText">....</div>
+        <div class="choices" id="choices">
+            <div class="choice-btn" onclick="location.href='slide3.25.html'">Show boss your design</div>
+            <div class="choice-btn" onclick="location.href='slide3.5.html'">Report boss for being a total bum</div>
+        </div>
+    </div>
+
+    <audio id="typeSound" src="type.mp3"></audio>
+    <audio id="bossYell" src="boss_yell.mp3"></audio>
+
+    <script>
+        const introVideo = document.getElementById("introVideo");
+        const introContainer = document.getElementById("introVideoContainer");
+        const bobText = document.getElementById("bobText");
+        const bossSpeech = document.getElementById("bossSpeech");
+        const choices = document.getElementById("choices");
+        const typeSound = document.getElementById("typeSound");
+        const bossYell = document.getElementById("bossYell");
+
+        const bossMsg = `ONE DAY IS UP! DID YOU MAKE A GOOD ENOUGH PLANE YET?! LEMME SEE!`;
+        let bossIndex = 0;
+
+        // Attempt to play with audio. If it fails, the skip button will handle it.
+        introVideo.play().catch(error => {
+            console.log("Autoplay with audio was prevented. User must interact.");
+        });
+
+        function skipIntro() {
+            // If the video was muted due to autoplay policy, unmute it on interaction.
+            introVideo.muted = false;
+            introVideo.play();
+            introContainer.style.display = "none";
+            startScene();
+        }
+
+        introVideo.onended = () => {
+            introContainer.style.display = "none";
+            startScene();
+        };
+
+        function startScene() {
+            document.body.classList.add("shake");
+            bossYell.play();
+            document.getElementById("boss").classList.add("show");
+            bossSpeech.style.display = "block";
+            typeBoss();
+        }
+
+        function typeBoss() {
+            if (bossIndex < bossMsg.length) {
+                bossSpeech.innerHTML = bossMsg.substring(0, bossIndex + 1) + '<span class="cursor"></span>';
+                typeSound.currentTime = 0;
+                typeSound.play().catch(e => {});
+                bossIndex++;
+                setTimeout(typeBoss, 34);
+            } else {
+                bossSpeech.innerHTML = bossMsg;
+                choices.style.display = "flex";
+                document.body.classList.remove("shake");
+            }
+        }
+    </script>
+    <script src="music.js"></script>
+</body>
+</html>

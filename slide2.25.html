@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PLAYER &gt; BOSS – SLIDE 2.25</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin:0; padding:0; height: 100vh; overflow: hidden; font-family: 'Press Start 2P', monospace; }
+        
+        /* DIMMED BACKGROUND */
+        .bg { position: fixed; inset:0; z-index: -1; }
+        .bg img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+        .dim-overlay { position: fixed; inset:0; background: rgba(8, 22, 45, 0.65); z-index:0; }
+        
+        /* CHARACTER */
+        .character { position: absolute; bottom: 20px; left: 20px; width: 320px; z-index: 2; }
+        
+        /* TEXTBOX */
+        .textbox { position: absolute; bottom: 80px; left: 360px; right: 40px; background: #0b1c3a; border: 4px solid #00ffaa; padding: 22px; color: #ffffff; font-size: 0.6rem; line-height: 2; z-index: 2; font-family: 'Press Start 2P', monospace; text-shadow: 2px 2px 0px #000; }
+        
+        /* TUTORIAL VIDEO FRAME */
+        .tutorial-container {
+            position: absolute;
+            top: 40px;             
+            bottom: 270px;         
+            left: 360px;           
+            right: 40px;           
+            background: #0b1c3a;
+            border: 4px solid #00ffaa;
+            padding: 12px;
+            z-index: 5;
+            cursor: pointer;
+            box-shadow: 8px 8px 0px #000;
+            display: flex; 
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .tutorial-container video {
+            width: 100%;
+            height: calc(100% - 24px); 
+            object-fit: contain;       
+            background: #000;
+            border: 2px solid #003322;
+        }
+        
+        .tutorial-hint {
+            color: #00ffaa;
+            font-size: 0.5rem;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* CONTINUE BUTTON */
+        .continue-btn { 
+            position: relative; 
+            z-index: 10; 
+            display: block; 
+            margin-top: 14px; 
+            padding: 12px 18px; 
+            background: #004433; 
+            border: 2px solid #00ffaa; 
+            color: #00ffaa; 
+            font-size: 0.55rem; 
+            font-family: 'Press Start 2P', monospace; 
+            cursor: pointer; 
+            display: none; 
+            text-shadow: 1px 1px 0px #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg">
+        <img src="background.jpg" alt="Background">
+    </div>
+    <div class="dim-overlay"></div>
+
+    <!-- TUTORIAL VIDEO CONTAINER -->
+    <div class="tutorial-container" id="tutorialBox" onclick="toggleTutorial()">
+        <video id="tutorialVid" playsinline>
+            <source src="tutorialvideo2.mp4" type="video/mp4">
+        </video>
+        <div class="tutorial-hint" id="tutorialHint">Click to Play</div>
+        <button class="continue-btn" id="continueBtn" onclick="goToNextSlide(event)">CONTINUE</button>
+    </div>
+
+    <img class="character" id="bob" src="Bob.png" alt="Bob">
+    
+    <!-- TEXTBOX -->
+    <div class="textbox" id="bobText">
+        <span id="bobDialogue"></span>
+    </div>
+
+    <audio id="typeSound" src="type.mp3"></audio>
+
+    <script>
+        const typeSound = document.getElementById("typeSound");
+        const bobDialogue = document.getElementById("bobDialogue");
+        const tutorialVid = document.getElementById("tutorialVid");
+        const tutorialHint = document.getElementById("tutorialHint");
+        const continueBtn = document.getElementById("continueBtn");
+        
+        
+        tutorialVid.volume = 0.2; 
+        
+        const bobMsg =
+`
+I remember now! The reason my design failed was because
+I didn't take into account the speed....
+
+I'm feeling a bit rusty with my math....
+Let's see an example.`;
+
+        let index = 0;
+
+        function typeBob() {
+            if (index < bobMsg.length) {
+                bobDialogue.innerHTML = bobMsg.substring(0, index + 1) + '<span class="cursor"></span>';
+                typeSound.currentTime = 0;
+                typeSound.play().catch(e => {});
+                index++;
+                setTimeout(typeBob, 38);
+            } else {
+                bobDialogue.innerHTML = bobMsg;
+            }
+        }
+
+        function toggleTutorial() {
+            if (event.target.id === "continueBtn") return;
+
+            if (tutorialVid.paused) {
+                tutorialVid.play();
+                tutorialHint.innerText = "Click to Pause";
+                tutorialHint.style.color = "#ff2222";
+            } else {
+                tutorialVid.pause();
+                tutorialHint.innerText = "Click to Play";
+                tutorialHint.style.color = "#00ffaa";
+            }
+        }
+
+        // Show continue button when video ends
+        tutorialVid.onended = () => {
+            tutorialHint.style.display = "none";
+            continueBtn.style.display = "inline-block";
+        };
+
+        function goToNextSlide(event) {
+            event.stopPropagation();
+            window.location.href = "slide2.5.html";
+        }
+
+        // START
+        window.addEventListener('DOMContentLoaded', () => {
+            typeBob();
+        });
+    </script>
+    <script src="music.js"></script>
+</body>
+</html>
