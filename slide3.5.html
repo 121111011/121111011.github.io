@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>VICTORY!</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: #000;
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    
+    /* FADE IN EFFECT */
+    opacity: 0;
+    animation: fadeIn 2s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  .victory-title {
+    font-size: 2.8rem;
+    color: #00ffaa;
+    text-shadow: 6px 6px 0 #004433;
+    margin-bottom: 40px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+
+  .message {
+    font-size: 0.7rem;
+    line-height: 2.2;
+    max-width: 800px;
+    padding: 0 20px;
+    margin-bottom: 50px;
+    color: #dddddd;
+  }
+
+  .restart-btn {
+    font-size: 0.6rem;
+    padding: 16px 32px;
+    background: #004433;
+    border: 4px solid #00ffaa;
+    color: #00ffaa;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .restart-btn:hover {
+    background: #006644;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="victory-title">YOU DEFEATED YOUR EVIL BOSS!</div>
+
+<div class="message">
+  You reported your boss to the company<br><br>
+  and he got fired!<br><br>
+  You're the boss now.<br><br>
+  You win.
+</div>
+
+<a class="restart-btn" href="home.html">
+  PLAY AGAIN?
+</a>
+
+<!-- 🔊 VICTORY AUDIO (NOW LOOPS) -->
+<audio autoplay loop>
+  <source src="win.mp3" type="audio/mpeg">
+</audio>
+<script src="music.js"></script>
+</body>
+</html>
