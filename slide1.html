@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PLAYER &gt; BOSS – SLIDE 1</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  /* SCREEN SHAKE */
+  .shake {
+    animation: screenShake 0.5s ease;
+  }
+
+  @keyframes screenShake {
+    0% { transform: translate(0); }
+    20% { transform: translate(-12px, 8px); }
+    40% { transform: translate(12px, -8px); }
+    60% { transform: translate(-8px, 6px); }
+    80% { transform: translate(8px, -6px); }
+    100% { transform: translate(0); }
+  }
+
+  #crashScreen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9999;
+  }
+
+  #crashScreen video {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    image-rendering: pixelated;
+  }
+
+  /* SKIP BUTTON */
+  .skip-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 16px;
+    font-size: 0.5rem;
+    background: #222;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+    cursor: pointer;
+    z-index: 10000;
+    display: none;
+  }
+
+  .skip-btn:hover {
+    background: #444;
+  }
+
+.dim-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 22, 45, 0.65);
+  z-index: 0;
+}
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+  }
+
+  .bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: pixelated;
+  }
+
+  .character {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 320px;
+    animation: bobFloat 1.6s infinite ease-in-out;
+  }
+
+  @keyframes bobFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .boss {
+    position: absolute;
+    top: 20px;
+    right: -400px;
+    width: 420px;
+    transition: right 0.9s ease-out;
+  }
+
+  .boss.show {
+    right: 20px;
+  }
+
+  .boss-speech {
+    position: absolute;
+    top: 20px;
+    right: 460px;
+    width: 420px;
+    background: #550000;
+    border: 6px solid #ff2222;
+    padding: 20px;
+    font-size: 0.6rem;
+    color: #ffffff;
+    display: none;
+    line-height: 1.9;
+    animation: bossPulse 1s infinite;
+    box-shadow: 8px 8px 0 #220000;
+  }
+
+  @keyframes bossPulse {
+    0%, 100% { box-shadow: 8px 8px 0 #220000; }
+    50% { box-shadow: 14px 14px 0 #330000; }
+  }
+
+  .textbox-container {
+    position: absolute;
+    bottom: 80px;
+    left: 360px;
+    right: 40px;
+  }
+
+  .name-tag {
+    background: #0b1c3a;
+    border: 4px solid #00ffaa;
+    border-bottom: none;
+    padding: 10px 16px;
+    font-size: 0.65rem;
+    color: #00ffaa;
+    width: fit-content;
+  }
+
+  .textbox {
+    background: #0b1c3a;
+    border: 4px solid #00ffaa;
+    padding: 22px;
+    color: #ffffff;
+    font-size: 0.6rem;
+    line-height: 2;
+    animation: pulse 3s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 6px 6px 0 #001122; }
+    50% { box-shadow: 8px 8px 0 #002244; }
+  }
+
+  .continue-btn {
+    margin-top: 14px;
+    padding: 12px 18px;
+    background: #004433;
+    border: 2px solid #00ffaa;
+    color: #00ffaa;
+    font-size: 0.55rem;
+    font-family: 'Press Start 2P', monospace;
+    cursor: pointer;
+    display: none;
+  }
+
+  .choices {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .choice-btn {
+    padding: 14px;
+    background: #004433;
+    border: 4px solid #00ffaa;
+    color: #00ffaa;
+    font-size: 0.6rem;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .choice-btn:hover {
+    background: #006644;
+  }
+</style>
+</head>
+
+<body>
+
+  <div class="dim-overlay"></div>
+<!-- SKIP BUTTON -->
+<button class="skip-btn" id="skipBtn" onclick="skipVideo()">
+  SKIP VIDEO
+</button>
+
+<div id="crashScreen">
+  <video id="crashVideo" autoplay muted playsinline>
+    <source src="crash.mp4" type="video/mp4">
+  </video>
+</div>
+
+<div class="bg">
+  <img src="background.jpg" alt="Background">
+</div>
+
+<img class="character" src="Bob.png" alt="Bob">
+<img class="boss" id="boss" src="Boss.png" alt="Boss">
+
+<div class="boss-speech" id="bossSpeech"></div>
+
+<div class="textbox-container">
+  <div class="name-tag">BOB</div>
+  <div class="textbox" id="textbox"></div>
+
+  <button class="continue-btn" id="continueBtn" onclick="showBoss()">
+    ▶ CONTINUE
+  </button>
+
+  <div class="choices" id="choices">
+    <div class="choice-btn" onclick="location.href='slide1.5.html'">
+      Talk back to Boss
+    </div>
+    <div class="choice-btn" onclick="location.href='slide2.html'">
+      Agree and listen on
+    </div>
+  </div>
+</div>
+
+<audio id="typeSound" src="type.mp3"></audio>
+<audio id="clickSound" src="click.mp3"></audio>
+<audio id="bossYell" src="boss_yell.mp3"></audio>
+
+<script>
+  const crashVideo = document.getElementById("crashVideo");
+  const skipBtn = document.getElementById("skipBtn");
+
+  crashVideo.muted = false;
+
+  // Show skip button shortly after video starts
+  setTimeout(() => {
+    skipBtn.style.display = "inline-block";
+  }, 800);
+
+  crashVideo.onended = () => {
+    skipBtn.style.display = "none";
+    document.getElementById("crashScreen").style.display = "none";
+  };
+
+  function skipVideo() {
+    document.getElementById("crashScreen").style.display = "none";
+    skipBtn.style.display = "none";
+  }
+
+  const textbox = document.getElementById("textbox");
+  const bossSpeech = document.getElementById("bossSpeech");
+  const typeSound = document.getElementById("typeSound");
+  const clickSound = document.getElementById("clickSound");
+  const bossYell = document.getElementById("bossYell");
+
+  const bobMessage =
+`WOAH! Damn I can't believe my super good genius plane design FAILED
+because of strong storms and wind.
+
+I'm such a disappointment to my family…
+
+Hopefully my boss doesn't realise or else I'm cooked.`;
+
+  const bossMessage =
+`YOUR DESIGN CRASHED MY EXPENSIVE AUTOPILOT ROBOTS!
+YOU’RE SUCH A FAILURE!!!`;
+
+  let bobIndex = 0;
+  let bossIndex = 0;
+
+  function typeBob() {
+    if (bobIndex < bobMessage.length) {
+      textbox.innerHTML =
+        bobMessage.substring(0, bobIndex + 1) +
+        '<span class="cursor"></span>';
+      typeSound.currentTime = 0;
+      typeSound.play();
+      bobIndex++;
+      setTimeout(typeBob, 38);
+    } else {
+      textbox.innerHTML = bobMessage;
+      document.getElementById("continueBtn").style.display = "inline-block";
+    }
+  }
+
+  function typeBoss() {
+    if (bossIndex < bossMessage.length) {
+      bossSpeech.innerHTML =
+        bossMessage.substring(0, bossIndex + 1) +
+        '<span class="cursor"></span>';
+      typeSound.currentTime = 0;
+      typeSound.play();
+      bossIndex++;
+      setTimeout(typeBoss, 38);
+    } else {
+      bossSpeech.innerHTML = bossMessage;
+    }
+  }
+
+  setTimeout(typeBob, 600);
+
+  function showBoss() {
+    clickSound.play();
+    document.body.classList.add("shake");
+    bossYell.play();
+
+    document.getElementById("boss").classList.add("show");
+    bossSpeech.style.display = "block";
+    typeBoss();
+
+    textbox.style.display = "none";
+    document.getElementById("continueBtn").style.display = "none";
+    document.getElementById("choices").style.display = "flex";
+
+    setTimeout(() => {
+      document.body.classList.remove("shake");
+    }, 600);
+  }
+</script>
+<script src="music.js"></script>
+</body>
+</html>

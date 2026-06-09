@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GAME OVER</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: #000;
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .game-over {
+    font-size: 3.5rem;
+    color: #ff2222;
+    text-shadow: 6px 6px 0 #550000;
+    margin-bottom: 30px;
+    animation: pulse 1.2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .message {
+    font-size: 0.7rem;
+    line-height: 2;
+    max-width: 700px;
+    padding: 0 20px;
+    margin-bottom: 40px;
+    color: #dddddd;
+  }
+
+  .restart-btn {
+    font-size: 0.6rem;
+    padding: 16px 32px;
+    background: #004433;
+    border: 4px solid #00ffaa;
+    color: #00ffaa;
+    cursor: pointer;
+    text-decoration: none;
+    display: none;
+    animation: fadeIn 1s forwards;
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  .restart-btn:hover {
+    background: #006644;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="game-over">GAME OVER</div>
+
+<div class="message">
+  too bad you live in a inequal (haha get it) society,<br><br>
+  your boss fired you haha.<br><br>
+  you lose.
+</div>
+
+<a class="restart-btn" id="restartBtn" href="home.html">
+  RESTART?
+</a>
+
+<script>
+  setTimeout(() => {
+    document.getElementById("restartBtn").style.display = "inline-block";
+    document.getElementById("restartBtn").style.opacity = "0";
+  }, 2500);
+</script>
+<script src="music.js"></script>
+</body>
+</html>
