@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PLAYER &gt; BOSS – SLIDE2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin:0; padding:0; height: 100vh; overflow: hidden; font-family: 'Press Start 2P', monospace; }
+        
+        /* DIMMED BACKGROUND */
+        .bg { position: fixed; inset:0; z-index: -1; }
+        .bg img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+        .dim-overlay { position: fixed; inset:0; background: rgba(8, 22, 45, 0.65); z-index:0; }
+        
+        /* FADE TO BLACK */
+        .fade-black { position: fixed; inset:0; background: #000; opacity:0; pointer-events: none; transition: opacity 1.2s ease; z-index: 9998; }
+        .fade-black.active { opacity:1; pointer-events: auto; }
+        
+        /* TRANSITION VIDEO */
+        .transition-video { position: fixed; inset:0; z-index: 9999; display: none; justify-content: center; align-items: center; background: #000; }
+        .transition-video video { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+        
+        /* CHARACTERS */
+        .character { position: absolute; bottom: 20px; left: 20px; width: 320px; transition: left 1.2s ease-in-out; z-index: 2; }
+        .boss { position: absolute; top: 20px; right: -400px; width: 420px; transition: right 0.9s ease-out; z-index: 3; }
+        .boss.show { right: 20px; }
+        
+        /* TEXTBOXES */
+        .textbox { position: absolute; bottom: 80px; left: 360px; right: 40px; background: #0b1c3a; border: 4px solid #00ffaa; padding: 22px; color: #ffffff; font-size: 0.6rem; line-height: 2; transition: left 1.2s ease-in-out; z-index: 2; font-family: 'Press Start 2P', monospace; text-shadow: 2px 2px 0px #000; }
+        .boss-speech { position: absolute; top: 20px; right: 460px; width: 420px; background: #550000; border: 6px solid #ff2222; padding: 20px; font-size: 0.6rem; color: #ffffff; line-height: 1.9; display: none; animation: bossPulse 1s infinite; z-index: 3; font-family: 'Press Start 2P', monospace; text-shadow: 2px 2px 0px #000; }
+        
+        @keyframes bossPulse { 
+            0%, 100% { box-shadow: 8px 8px 0 #220000; } 
+            50% { box-shadow: 14px 14px 0 #330000; } 
+        }
+        
+        /* CONTINUE BUTTON */
+        .continue-btn { 
+            position: relative; 
+            z-index: 10; 
+            display: block; 
+            margin-top: 14px; 
+            padding: 12px 18px; 
+            background: #004433; 
+            border: 2px solid #00ffaa; 
+            color: #00ffaa; 
+            font-size: 0.55rem; 
+            font-family: 'Press Start 2P', monospace; 
+            cursor: pointer; 
+            display: none; 
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        /* TUTORIAL VIDEO FRAME */
+        .tutorial-container {
+            position: absolute;
+            top: 40px;             
+            bottom: 270px;         
+            left: 360px;           
+            right: 40px;           
+            background: #0b1c3a;
+            border: 4px solid #00ffaa;
+            padding: 12px;
+            display: none;         
+            z-index: 5;
+            cursor: pointer;
+            box-shadow: 8px 8px 0px #000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .tutorial-container video {
+            width: 100%;
+            height: calc(100% - 24px); 
+            object-fit: contain;       
+            background: #000;
+            border: 2px solid #003322;
+        }
+        
+        .tutorial-hint {
+            color: #00ffaa;
+            font-size: 0.5rem;
+            text-align: center;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* NEW: Specific style for the tutorial continue button */
+        #tutorialContinueBtn {
+            margin-top: 10px;
+            padding: 10px 16px;
+            background: #004433;
+            border: 2px solid #00ffaa;
+            color: #00ffaa;
+            font-size: 0.5rem;
+            font-family: 'Press Start 2P', monospace;
+            cursor: pointer;
+            display: none; /* Hidden by default */
+            text-shadow: 1px 1px 0px #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg">
+        <img src="background.jpg" alt="Background">
+    </div>
+    <div class="dim-overlay"></div>
+    <div class="fade-black" id="fadeBlack"></div>
+
+    <!-- TRANSITION VIDEO -->
+    <div class="transition-video" id="transitionVideo">
+        <video id="transitionVid" playsinline>
+            <source src="transition.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- TUTORIAL VIDEO CONTAINER -->
+    <div class="tutorial-container" id="tutorialBox" onclick="toggleTutorial()">
+        <video id="tutorialVid" playsinline>
+            <source src="tutorialvideo1.mp4" type="video/mp4">
+        </video>
+        <div class="tutorial-hint" id="tutorialHint">Click to Play</div>
+        <!-- ADDED CONTINUE BUTTON -->
+        <button id="tutorialContinueBtn" onclick="goToSlide25(event)">CONTINUE</button>
+    </div>
+
+    <img class="character" id="bob" src="Bob.png" alt="Bob">
+    <img class="boss" id="boss" src="Boss.png" alt="Boss">
+    <div class="boss-speech" id="bossSpeech"></div>
+    
+    <!-- TEXTBOX -->
+    <div class="textbox" id="bobText">
+        <span id="bobDialogue">....</span>
+        <button class="continue-btn" id="continueBtn" onclick="bossLeaves()">CONTINUE</button>
+    </div>
+
+    <audio id="typeSound" src="type.mp3"></audio>
+    <audio id="bossYell" src="boss_yell.mp3"></audio>
+
+    <script>
+        const typeSound = document.getElementById("typeSound");
+        const bossYell = document.getElementById("bossYell");
+        const vid = document.getElementById("transitionVid");
+        const bobDialogue = document.getElementById("bobDialogue");
+        
+        const tutorialBox = document.getElementById("tutorialBox");
+        const tutorialVid = document.getElementById("tutorialVid");
+        const tutorialHint = document.getElementById("tutorialHint");
+        const tutorialContinueBtn = document.getElementById("tutorialContinueBtn");
+        
+        const bossMsg = `YOU HAVE 1 DAY TO COME UP WITH A NEW DESIGN BEFORE I FIRE YOUR #$$!!!!!!!! IF IT STILL DOESN’T WORK AGAINST THE WINDS AND STORM YOU’RE SO COOKED. Urgh… you made me miss my morning matcha~`;
+        const bobMsg2 = `Okay I guess, ragebaited him... I better get working...`;
+        const bobMsg3 = `Since I lowkey failed last time, I think it would be good to freshen up my knowledge...`;
+        let boIndex = 0;
+        
+
+
+        function typeBoss() {
+            if (boIndex < bossMsg.length) {
+                bossSpeech.innerHTML = bossMsg.substring(0, boIndex + 1) + '<span class="cursor"></span>';
+                typeSound.currentTime = 0;
+                typeSound.play().catch(e => console.log("Audio play blocked until user clicks"));
+                boIndex++;
+                setTimeout(typeBoss, 34);
+            } else {
+                bossSpeech.innerHTML = bossMsg;
+                document.getElementById("continueBtn").style.display = "inline-block";
+            }
+        }
+
+        function bossLeaves() {
+            document.getElementById("boss").style.right = "-500px";
+            document.getElementById("bossSpeech").style.display = "none";
+            
+            bobDialogue.innerText = bobMsg2; 
+            document.getElementById("continueBtn").style.display = "none";
+            setTimeout(bobLeavesAnim, 2000);
+        }
+
+        function bobLeavesAnim() {
+            document.getElementById("bob").style.left = "-400px";
+            document.getElementById("bobText").style.left = "-400px";
+            document.getElementById("fadeBlack").classList.add("active");
+            setTimeout(playTransition, 1200);
+        }
+
+        function playTransition() {
+            document.getElementById("transitionVideo").style.display = "flex";
+            vid.muted = false; 
+            vid.play().catch(error => {
+                console.log("Muted fallback triggered:", error);
+                vid.muted = true;
+                vid.play();
+            });
+        }
+
+        vid.onended = () => {
+            document.getElementById("transitionVideo").style.display = "none";
+            showBobReturn();
+        };
+
+        function showBobReturn() {
+            document.getElementById("fadeBlack").classList.remove("active");
+            const bob = document.getElementById("bob");
+            const bobText = document.getElementById("bobText");
+            bob.style.left = "20px";
+            bobText.style.left = "360px";
+            bobDialogue.innerText = "";
+            
+            tutorialBox.style.display = "block";
+            
+            let i = 0;
+            function typeBob3() {
+                if (i < bobMsg3.length) {
+                    bobDialogue.innerHTML = bobMsg3.substring(0, i + 1) + '<span class="cursor"></span>';
+                    typeSound.currentTime = 0;
+                    typeSound.play().catch(e => {});
+                    i++;
+                    setTimeout(typeBob3, 38);
+                } else {
+                    bobDialogue.innerHTML = bobMsg3;
+                }
+            }
+            typeBob3();
+        }
+
+        function toggleTutorial() {
+            if (tutorialVid.paused) {
+                tutorialVid.play();
+                tutorialHint.innerText = "Click to Pause";
+                tutorialHint.style.color = "#ff2222";
+            } else {
+                tutorialVid.pause();
+                tutorialHint.innerText = "Click to Play";
+                tutorialHint.style.color = "#00ffaa";
+            }
+        }
+
+        // NEW: Show continue button when tutorial ends
+        tutorialVid.onended = () => {
+            tutorialHint.style.display = "none";
+            tutorialContinueBtn.style.display = "inline-block";
+        };
+
+        // NEW: Function to go to slide 2.25
+        function goToSlide25(event) {
+            event.stopPropagation(); // Prevent the video toggle from firing
+            window.location.href = "slide2.25.html";
+        }
+
+        /* START */
+        document.getElementById("boss").classList.add("show");
+        document.getElementById("bossSpeech").style.display = "block";
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            typeBoss();
+        });
+    </script>
+    <script src="music.js"></script>
+</body>
+</html>
